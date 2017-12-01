@@ -3,10 +3,17 @@ class ScrapeService {
     console.log(targetUrl);
     request(targetUrl, function (error, response, html) {
             if (!error) {
-                const $ = cheerio.load(html);
-                $('tr').filter(function () {
-                    const data = $(this).text();
-                    console.log(data);
+                let $ = cheerio.load(html);
+                $('tr').each(function() {
+                  let title = '';
+                  let rating = 0;
+                  let numOfReviews = 0;
+                  console.log($( this ).find('.bookTitle').first().text());
+                  // console.log($( this ).text());
+                  // var data = $( this )//.children('.bookTitle');
+                  //  console.log(data.text());
+                    // const data = $(this).text();
+                    // console.log(data);
                  
                 });
             }
