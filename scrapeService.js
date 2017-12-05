@@ -3,12 +3,36 @@ var request = require('request');
 var book = require('./book');
 var fs = require('fs');
 
+let books = []
 class ScrapeService {
-  static scrapeToCsv(targetUrl) {
-    let parsedBook = this.scrape(targetUrl);
+  static writeToCsv() {
+    // fs.writeFile('ExportDir/books.csv', books, 'utf8', function (err) {
+    //   if (err) {
+    //     console.log('Some error occured - file either not saved or corrupted file saved.');
+    //   } else {
+    //     console.log('It\'s saved!');
+    //   }
+    // });
+    var writeStream = fs.createWriteStream('ExportDir/books.csv');
+    writeStream.on('error', function (err) {
+      if (err) {
+        console.log('Some error occured - file either not saved or corrupted file saved.');
+      } else {
+        console.log('It\'s saved!');
+      }
+    });
+    books.forEach(function (book) { writeStream.write(book.toCsv()); });
+    writeStream.end();
+    console.log("App finished executing.");
   }
-  static scrape(targetUrl) {
-    console.log(targetUrl);
+  static scrapeToCsv(baseUrl,endPageNum) {
+    let parsedBook = this.scrape(baseUrl,1,endPageNum, this.scrape,this.writeToCsv);
+  }
+
+  static scrape(baseUrl,currentPage,endPageNum, scrapeCallBack,writeFileCallback) {
+
+    let targetUrl = baseUrl + currentPage.toString();
+    console.log("Starting Scrape for: "+targetUrl);
     request(targetUrl, function (error, response, html) {
       if (!error) {
         let $ = cheerio.load(html);
@@ -17,9 +41,27 @@ class ScrapeService {
           // minirating
           let rawMiniRatings = $(this).find('.minirating').first().text();
           // come back here, add to array
-          return book.Book.formatTextIntoBook(rawTitle, rawMiniRatings, true);
+          books.push(book.Book.formatTextIntoBook(rawTitle, rawMiniRatings, true));
 
         });
+        // Make sure the callback is a function​
+        if (currentPage < endPageNum ) {
+          //wait 10 seconds before loading next page, to appear less suspicious 
+          var start = new Date().getTime();
+          var end = start;
+          while(end < start + 10000) {
+            end = new Date().getTime();
+         }
+          // scrape the next page
+          scrapeCallBack(baseUrl,currentPage+1,endPageNum, scrapeCallBack,writeFileCallback);
+        }
+        if (currentPage === endPageNum) {
+          writeFileCallback();
+        }
+      }
+      if(error)
+      {
+        console.log('Some error occured - unable to load website.');
       }
     });
   }
