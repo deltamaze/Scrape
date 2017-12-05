@@ -6,27 +6,18 @@ var fs = require('fs');
 let books = []
 class ScrapeService {
   static writeToCsv() {
-    // fs.writeFile('ExportDir/books.csv', books, 'utf8', function (err) {
-    //   if (err) {
-    //     console.log('Some error occured - file either not saved or corrupted file saved.');
-    //   } else {
-    //     console.log('It\'s saved!');
-    //   }
-    // });
-    var writeStream = fs.createWriteStream('ExportDir/books.csv');
+    var writeStream = fs.createWriteStream('books.csv');
     writeStream.on('error', function (err) {
       if (err) {
-        console.log('Some error occured - file either not saved or corrupted file saved.');
-      } else {
-        console.log('It\'s saved!');
+        console.log('Some error occured - file either not saved or corrupted file saved.'+err.toString());
       }
     });
     books.forEach(function (book) { writeStream.write(book.toCsv()); });
     writeStream.end();
-    console.log("App finished executing.");
+    console.log("App finished executing. books.csv saved");
   }
-  static scrapeToCsv(baseUrl,endPageNum) {
-    let parsedBook = this.scrape(baseUrl,1,endPageNum, this.scrape,this.writeToCsv);
+  static scrapeToCsv(baseUrl,startPageNumber,endPageNum) {
+    let parsedBook = this.scrape(baseUrl,startPageNumber,endPageNum, this.scrape,this.writeToCsv);
   }
 
   static scrape(baseUrl,currentPage,endPageNum, scrapeCallBack,writeFileCallback) {

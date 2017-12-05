@@ -15,8 +15,19 @@ class Book {
       title = title.trim();
       
       miniRatings = miniRatings.trim();
-      let rating = miniRatings.split("avg")[0].trim();
+      
       let numOfReviews = miniRatings.split("—")[1].split("ratings")[0].trim();
+      // for some reason, if a rating is exactly x.0 
+      // it triggers tooltip text, which messed with how string is parsed.
+      let rating = miniRatings.split("avg")[0];
+      rating = rating.replace('did not like it','') ;
+      rating = rating.replace('it was ok','') ;
+      rating = rating.replace('really liked it','') ;
+      rating = rating.replace('liked it','') ;
+      rating = rating.replace('it was amazing','') ;
+      rating = rating.trim();
+      
+
       if(removeCommas)
       {
         title = title.replace(/,/g,'') ;
